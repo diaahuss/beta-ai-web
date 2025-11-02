@@ -45,14 +45,10 @@ app.post("/api/chat", async (req, res) => {
   }
 });
 
-// ✅ Get port from Railway (must exist)
-const PORT = process.env.PORT;
-if (!PORT) {
-  console.error("❌ No PORT defined in environment");
-  process.exit(1);
-}
+// ✅ Get the port from Railway
+const PORT = process.env.PORT || 3000; // fallback just in case
 
-// Start server on all network interfaces
+// Start server
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`✅ Server running on port ${PORT}`);
 });
