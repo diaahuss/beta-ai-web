@@ -1,85 +1,46 @@
-// Mock key (replace later)
-const MOCK_API_KEY = "sk-mock-key-1234";
+// script.js
 
-// ---------------- LOGIN ----------------
-function login() {
-  const phone = document.getElementById("loginPhone").value;
-  const pin = document.getElementById("loginPin").value;
-  const user = JSON.parse(localStorage.getItem(phone));
+// Assuming storedUser is defined globally from register page
+// e.g., storedUser = { name: "Diaa", phone: "123456", pin: "1234" }
 
-  if (user && user.pin === pin) {
-    localStorage.setItem("currentUser", phone);
-    location.href = "ai_selection.html";
-  } else {
-    alert("Invalid phone or PIN.");
-  }
+const messagesContainer = document.getElementById("messages");
+const messageInput = document.getElementById("messageInput");
+const sendBtn = document.getElementById("sendBtn");
+
+const userId = storedUser.phone; // unique identifier per user
+
+function addMessage(text, sender) {
+  const msgElem = document.createElement("div");
+  msgElem.className = sender === "user" ? "message user" : "message ai";
+  msgElem.textContent = text;
+  messagesContainer.appendChild(msgElem);
+  messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
 
-// ---------------- CREATE ACCOUNT ----------------
-function createAccount() {
-  const name = document.getElementById("newName").value;
-  const phone = document.getElementById("newPhone").value;
-  const pin = document.getElementById("newPin").value;
-
-  if (!name || !phone || !pin) {
-    alert("Please fill all fields.");
-    return;
-  }
-
-  localStorage.setItem(phone, JSON.stringify({ name, phone, pin }));
-  alert("Account created successfully!");
-  location.href = "index.html";
-}
-
-// ---------------- RESET PIN ----------------
-function resetPin() {
-  const phone = document.getElementById("resetPhone").value;
-  const newPin = document.getElementById("resetPin").value;
-  const user = JSON.parse(localStorage.getItem(phone));
-
-  if (user) {
-    user.pin = newPin;
-    localStorage.setItem(phone, JSON.stringify(user));
-    alert("PIN updated successfully!");
-    location.href = "index.html";
-  } else {
-    alert("User not found.");
-  }
-}
-
-// ---------------- SELECT AI ----------------
-function selectAI(aiName) {
-  localStorage.setItem("selectedAI", aiName);
-  location.href = "chat.html";
-}
-
-// ---------------- CHAT ----------------
 async function sendMessage() {
-  const input = document.getElementById("userInput");
-  const chatBox = document.getElementById("chatBox");
-  const message = input.value.trim();
-  const aiName = localStorage.getItem("selectedAI") || "Theo";
-
+  const message = messageInput.value.trim();
   if (!message) return;
 
-  chatBox.innerHTML += `<div class="msg user">You: ${message}</div>`;
-  input.value = "";
-  input.focus();
+  addMessage(`You: ${message}`, "user");
+  messageInput.value = "";
 
-  const reply = await mockAIResponse(message, aiName);
-  chatBox.innerHTML += `<div class="msg ai">${reply}</div>`;
-  chatBox.scrollTop = chatBox.scrollHeight;
+  try {
+    const res = await fetch("/api/ai", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message, userId })
+    });
+
+    const data = await res.json();
+    addMessage(`Theo: ${data.response}`, "ai");
+  } catch (err) {
+    console.error(err);
+    addMessage("Theo: Sorry, something went wrong.", "ai");
+  }
 }
 
-function mockAIResponse(message, aiName) {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(`${aiName}: ${message.split('').reverse().join('')}`);
-    }, 700);
-  });
-}
-
-function logout() {
-  localStorage.removeItem("currentUser");
-  location.href = "index.html";
-}
+// Event listeners
+sendBtn.addEventListener("click", sendMessage);
+messageInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") sendMessage();
+});
