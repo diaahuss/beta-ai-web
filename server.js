@@ -17,19 +17,16 @@ const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// Default route
+// ✅ Default route (healthcheck)
 app.get("/", (req, res) => {
   res.send("✅ BetaAI Server is running successfully on Railway!");
 });
 
-// Example AI route
+// ✅ AI route
 app.post("/api/chat", async (req, res) => {
   try {
     const { message } = req.body;
-
-    if (!message) {
-      return res.status(400).json({ error: "Message is required" });
-    }
+    if (!message) return res.status(400).json({ error: "Message is required" });
 
     const response = await client.chat.completions.create({
       model: "gpt-4o-mini",
@@ -41,20 +38,21 @@ app.post("/api/chat", async (req, res) => {
 
     const reply = response.choices[0].message.content;
     res.json({ reply });
+
   } catch (error) {
     console.error("❌ Error in /api/chat:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
-// ✅ Get the port from Railway
+// ✅ Get port from Railway (must exist)
 const PORT = process.env.PORT;
 if (!PORT) {
   console.error("❌ No PORT defined in environment");
   process.exit(1);
 }
 
-// Start server
+// Start server on all network interfaces
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`✅ Server running on port ${PORT}`);
 });
