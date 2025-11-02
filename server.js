@@ -47,8 +47,10 @@ app.post("/api/chat", async (req, res) => {
   }
 });
 
-// ✅ Important for Railway — use their dynamic port
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
+// Get the port from Railway (environment variable)
+const PORT = process.env.PORT || 3000;
+
+// Start server
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`✅ Server running on port ${PORT}`);
 });
