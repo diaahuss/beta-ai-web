@@ -1,28 +1,22 @@
-// ✅ server.js — Production Ready for Railway
-
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import OpenAI from "openai";
 
-// Load environment variables
 dotenv.config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Initialize OpenAI client
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// ✅ Default route (healthcheck)
 app.get("/", (req, res) => {
   res.send("✅ BetaAI Server is running successfully on Railway!");
 });
 
-// ✅ AI route
 app.post("/api/chat", async (req, res) => {
   try {
     const { message } = req.body;
@@ -36,19 +30,20 @@ app.post("/api/chat", async (req, res) => {
       ],
     });
 
-    const reply = response.choices[0].message.content;
-    res.json({ reply });
-
+    res.json({ reply: response.choices[0].message.content });
   } catch (error) {
-    console.error("❌ Error in /api/chat:", error);
+    console.error(error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
-// ✅ Get the port from Railway
-const PORT = process.env.PORT || 3000; // fallback just in case
+// ✅ Railway must assign the port
+const PORT = process.env.PORT;
+if (!PORT) {
+  console.error("❌ No PORT defined by Railway");
+  process.exit(1);
+}
 
-// Start server
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`✅ Server running on port ${PORT}`);
 });
