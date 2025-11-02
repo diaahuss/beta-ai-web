@@ -12,17 +12,17 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ✅ Initialize OpenAI client
+// Initialize OpenAI client
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// ✅ Default route
+// Default route
 app.get("/", (req, res) => {
   res.send("✅ BetaAI Server is running successfully on Railway!");
 });
 
-// ✅ Example route: /api/chat
+// Example AI route
 app.post("/api/chat", async (req, res) => {
   try {
     const { message } = req.body;
@@ -47,8 +47,12 @@ app.post("/api/chat", async (req, res) => {
   }
 });
 
-// Get the port from Railway (environment variable)
-const PORT = process.env.PORT || 3000;
+// ✅ Get the port from Railway
+const PORT = process.env.PORT;
+if (!PORT) {
+  console.error("❌ No PORT defined in environment");
+  process.exit(1);
+}
 
 // Start server
 app.listen(PORT, "0.0.0.0", () => {
